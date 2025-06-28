@@ -1,0 +1,10 @@
+## Title: AsylumTimers
+## Author: Shienar
+## APIVersion: 101046
+## Version: 1.0.0
+## IsLibrary: False
+## ConsoleDependsOn: LibHarvensAddonSettings>=20004 LibChatMessage
+## SavedVariables: ATSavedVariables
+
+AsylumTimers.xml
+AsylumTimers.lua
