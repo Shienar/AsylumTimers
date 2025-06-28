@@ -97,6 +97,7 @@ function AT.onNewZone(eventCode, initial)
 	local zoneID, _, _, _ = GetUnitRawWorldPosition("player")
 	
 	if zoneID == 1000 then
+		AsylumTimers:SetHidden(false)
 		if AT.isRegistered == false then
 			AT.isRegistered = true
 			
@@ -106,6 +107,7 @@ function AT.onNewZone(eventCode, initial)
 			EVENT_MANAGER:RegisterForEvent(AT.name, EVENT_COMBAT_EVENT, AT.onCombatEvent)
 		end
 	else
+		AsylumTimers:SetHidden(true)
 		if AT.isRegistered then 
 			AT.isRegistered = false
 			
@@ -147,6 +149,8 @@ function AT.Initialize()
 	AsylumTimers:ClearAnchors()
 	AsylumTimers:SetAnchor(3, GuiRoot, 3, AT.savedVariables.offset_x, AT.savedVariables.offset_y)
 
+	AT.onNewZone(_, _)
+	
 	--settings
 	local settings = LibHarvensAddonSettings:AddAddon("Asylum Timers")
 	local areSettingsDisabled = false
