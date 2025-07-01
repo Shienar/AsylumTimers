@@ -3,7 +3,7 @@
 ## APIVersion: 101046
 ## Version: 1.0.0
 ## IsLibrary: False
-## ConsoleDependsOn: LibHarvensAddonSettings>=20004 LibChatMessage
+## ConsoleDependsOn: LibHarvensAddonSettings>=20004
 ## SavedVariables: ATSavedVariables
 
 AsylumTimers.xml

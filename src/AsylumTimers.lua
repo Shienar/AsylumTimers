@@ -5,6 +5,12 @@ local function updateFont(font)
 	AsylumTimers_LlothisTimer:SetFont(font)
 	AsylumTimers_FelmsTitle:SetFont(font)
 	AsylumTimers_FelmsTimer:SetFont(font)
+	AsylumTimers_BashTitle:SetFont(font)
+	AsylumTimers_BashTimer:SetFont(font)
+	AsylumTimers_KiteTitle:SetFont(font)
+	AsylumTimers_KiteTimer:SetFont(font)
+	AsylumTimers_JumpTitle:SetFont(font)
+	AsylumTimers_JumpTimer:SetFont(font)
 end
 
 local function formatSeconds(seconds)
@@ -12,20 +18,66 @@ local function formatSeconds(seconds)
 end
 
 function AT.updateText()
-	AsylumTimers_LlothisTimer:SetText(formatSeconds(AT.time_Llothis))
-	AsylumTimers_FelmsTimer:SetText(formatSeconds(AT.time_Felms))
-	
-	if AT.time_Llothis > 0 then 
-		AT.time_Llothis = AT.time_Llothis - 1 
-	elseif AT.isLlothisEnraged == false and AT.hasLlothisSpawned then
+	--Llothis
+	if (AT.time_Llothis <= 0 and AT.isLlothisEnraged == false and AT.hasLlothisSpawned) or AT.isLlothisEnraged then
 		AT.isLlothisEnraged = true
-		AsylumTimers_LlothisTimer:SetColor(1.0, 0.0, 0.0, 1.0)
+		AsylumTimers_LlothisTimer:SetText("ENRAGED")
+		AsylumTimers_LlothisTimer:SetColor(AT.savedVariables.enragedColor.red, AT.savedVariables.enragedColor.green, AT.savedVariables.enragedColor.blue, AT.savedVariables.enragedColor.alpha)
+	elseif AT.time_Llothis > 0 then 
+		AsylumTimers_LlothisTimer:SetText(formatSeconds(AT.time_Llothis))
+		AT.time_Llothis = AT.time_Llothis - 1 
 	end
-	if AT.time_Felms > 0 then 
-		AT.time_Felms = AT.time_Felms - 1 
-	elseif AT.isFelmsEnraged == false and AT.hasFelmsSpawned then
+	
+	--Felms
+	if (AT.time_Felms <= 0 and AT.isFelmsEnraged == false and AT.hasFelmsSpawned) or AT.isFelmsEnraged then
 		AT.isFelmsEnraged = true
-		AsylumTimers_FelmsTimer:SetColor(1.0, 0.0, 0.0, 1.0)
+		AsylumTimers_FelmsTimer:SetText("ENRAGED")
+		AsylumTimers_FelmsTimer:SetColor(AT.savedVariables.enragedColor.red, AT.savedVariables.enragedColor.green, AT.savedVariables.enragedColor.blue, AT.savedVariables.enragedColor.alpha)
+	elseif AT.time_Felms > 0 then 
+		AsylumTimers_FelmsTimer:SetText(formatSeconds(AT.time_Felms))
+		AT.time_Felms = AT.time_Felms - 1 
+	end
+	
+	--Kite
+	if AT.displayKite == true then
+		AsylumTimers_KiteTimer:SetText("KITE")
+		AsylumTimers_KiteTimer:SetColor(AT.savedVariables.mechColor.red, AT.savedVariables.mechColor.green, AT.savedVariables.mechColor.blue, AT.savedVariables.mechColor.alpha)
+	elseif AT.time_Kite > 0 then
+		AT.time_Kite = AT.time_Kite - 1
+		AsylumTimers_KiteTimer:SetText(formatSeconds(AT.time_Kite))
+		AsylumTimers_KiteTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
+	elseif DoesUnitExist("boss1") then
+		local health, maxHealth, _ = GetUnitPower("boss1", COMBAT_MECHANIC_FLAGS_HEALTH)
+		if health/maxHealth <= 0.9 then
+			AsylumTimers_KiteTimer:SetText("SOON")
+			AsylumTimers_KiteTimer:SetColor(AT.savedVariables.soonColor.red, AT.savedVariables.soonColor.green, AT.savedVariables.soonColor.blue, AT.savedVariables.soonColor.alpha)
+		end
+	end
+	
+	--Bash
+	if AT.activeBash then
+		AsylumTimers_BashTimer:SetText("BASH")
+		AsylumTimers_BashTimer:SetColor(AT.savedVariables.mechColor.red, AT.savedVariables.mechColor.green, AT.savedVariables.mechColor.blue, AT.savedVariables.mechColor.alpha)
+	elseif AT.time_Bash > 0 then 
+		AsylumTimers_BashTimer:SetText(formatSeconds(AT.time_Bash))
+		AT.time_Bash = AT.time_Bash - 1
+		AsylumTimers_BashTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
+	elseif AT.hasLlothisSpawned then
+		AsylumTimers_BashTimer:SetText("SOON")
+		AsylumTimers_BashTimer:SetColor(AT.savedVariables.soonColor.red, AT.savedVariables.soonColor.green, AT.savedVariables.soonColor.blue, AT.savedVariables.soonColor.alpha)
+	end
+	
+	--Jump (Felms)
+	if AT.felmsJumps ~= 0 then
+		AsylumTimers_JumpTimer:SetText("JUMPING")
+		AsylumTimers_JumpTimer:SetColor(AT.savedVariables.mechColor.red, AT.savedVariables.mechColor.green, AT.savedVariables.mechColor.blue, AT.savedVariables.mechColor.alpha)
+	elseif AT.time_Jump > 0 then
+		AsylumTimers_JumpTimer:SetText(formatSeconds(AT.time_Jump))
+		AT.time_Jump = AT.time_Jump - 1
+		AsylumTimers_JumpTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
+	elseif AT.hasFelmsSpawned then
+		AsylumTimers_JumpTimer:SetText("SOON")
+		AsylumTimers_JumpTimer:SetColor(AT.savedVariables.soonColor.red, AT.savedVariables.soonColor.green, AT.savedVariables.soonColor.blue, AT.savedVariables.soonColor.alpha)
 	end
 end
 
@@ -33,58 +85,116 @@ function AT.onEffect(eventCode, changeType, effectSlot, effectName, unitTag, beg
 	if abilityID == 99990 then --Dormant
 		if changeType == EFFECT_RESULT_GAINED  then
 			
-			if unitName == "Saint Llothis the Pious^M" then
-				if AT.savedVariables.debugMessages then AT.chat:Print("Llothis Died!") end
+			if string.find(unitName, "Llothis") ~= nil then
 				
 				AT.time_Llothis = 45
-				AsylumTimers_LlothisTimer:SetColor(0.0, 1.0, 0.0, 1.0)
+				AsylumTimers_LlothisTimer:SetColor(AT.savedVariables.downedColor.red, AT.savedVariables.downedColor.green, AT.savedVariables.downedColor.blue, AT.savedVariables.downedColor.alpha)
 				AT.isLlothisEnraged = false
-			elseif unitName == "Saint Felms the Bold^M" then
-				if AT.savedVariables.debugMessages then AT.chat:Print("Felms Died!") end
+			elseif string.find(unitName, "Felms") ~= nil then
 				
 				AT.time_Felms = 45
-				AsylumTimers_FelmsTimer:SetColor(0.0, 1.0, 0.0, 1.0)
+				AsylumTimers_FelmsTimer:SetColor(AT.savedVariables.downedColor.red, AT.savedVariables.downedColor.green, AT.savedVariables.downedColor.blue, AT.savedVariables.downedColor.alpha)
 				AT.isFelmsEnraged = false
 			end
 		
 		elseif changeType == EFFECT_RESULT_FADED then
 			
-			if unitName == "Saint Llothis the Pious^M" then
-				if AT.savedVariables.debugMessages then AT.chat:Print("Llothis Respawned!") end
+			if string.find(unitName, "Llothis") ~= nil then
 				
 				AT.time_Llothis = 180
-				AsylumTimers_FelmsTimer:SetColor(1.0, 1.0, 1.0, 1.0)
-			elseif unitName == "Saint Felms the Bold^M" then
-				if AT.savedVariables.debugMessages then AT.chat:Print("Felms Respawned!") end
+				AsylumTimers_LlothisTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
+			elseif string.find(unitName, "Felms") ~= nil then
 				
 				AT.time_Felms = 180
-				AsylumTimers_FelmsTimer:SetColor(1.0, 1.0, 1.0, 1.0)
+				AsylumTimers_FelmsTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
 			end
 			
+		end
+	elseif abilityID == 101354 and changeType == EFFECT_RESULT_GAINED then --Enrage	
+		if string.find(unitName, "Llothis") ~= nil then
+			
+			AT.isLlothisEnraged = true
+		elseif string.find(unitName, "Felms") ~= nil then
+			
+			AT.isFelmsEnraged = true
 		end
 	end
 end
 
 function AT.onCombatEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, _log, sourceUnitID, targetUnitID, abilityID, overflow)
-	if AT.hasLlothisSpawned == false and sourceName == "Saint Llothis the Pious^M" then
-		if AT.savedVariables.debugMessages then AT.chat:Print("Llothis Spawned! (Initial)") end
-		
+	--Miniboss Spawn
+	if AT.hasLlothisSpawned == false and(string.find(sourceName, "Llothis") ~= nil or string.find(targetName, "Llothis") ~= nil) then
 		AT.hasLlothisSpawned = true
 		AT.time_Llothis = 180
-	elseif AT.hasFelmsSpawned == false and sourceName == "Saint Felms the Bold^M" then
-		if AT.savedVariables.debugMessages then AT.chat:Print("Felms Spawned! (Initial) (CombatEvent)") end
-		
+		AT.time_Bash = AT.cooldowns.bash
+		AsylumTimers_BashTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
+	elseif AT.hasFelmsSpawned == false and (string.find(sourceName, "Felms") ~= nil or string.find(targetName, "Felms") ~= nil) then	
 		AT.hasFelmsSpawned = true
 		AT.time_Felms = 180
+		AT.time_Jump = AT.cooldowns.jump
+		AsylumTimers_JumpTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
+	end
+	
+	--Llothis Bash
+	if result == ACTION_RESULT_INTERRUPT then
+		AT.time_Bash = AT.cooldowns.bash
+		AsylumTimers_BashTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
+		
+		AT.activeBash = false
+		zo_callLater(function()
+			AT.activeBash = false 
+		end, 2500)
+	end
+	
+	if abilityID == 95687 or abilityID == 9566 then --Oppressive Bolt Sound
+		if AT.savedVariables.bashSound and AT.hasLlothisBashSoundPlayedRecently == false then
+			PlaySound(SOUNDS.RAID_TRIAL_FAILED)
+			AT.hasLlothisBashSoundPlayedRecently = true
+			zo_callLater(function() AT.hasLlothisBashSoundPlayedRecently = false end, 250)
+		end
+		AT.activeBash = true
+	elseif abilityID == 98535 then --Storm the heavens
+		if AT.activeKite == false then
+			AT.displayKite = true
+			AT.activeKite = true
+			zo_callLater(function ()
+				AT.time_Kite = AT.cooldowns.kite
+				AT.displayKite = false
+				end, 5000)
+			zo_callLater(function ()
+				AT.activeKite = false
+			end, 10000)
+		end
+	elseif abilityID == 99138 then --teleport strike
+		AT.felmsJumps = AT.felmsJumps + 1
+		AT.hasFelmsJumpedRecently = true
+		zo_callLater(function() AT.hasFelmsJumpedRecently = false end, 250)
+		
+		if AT.felmsJumps == 3 then
+			AT.felmsJumps = 0
+			AT.time_Jump = AT.cooldowns.jump
+			AsylumTimers_JumpTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
+		end
 	end
 end
 
-function AT.onWipe(eventCode)
+function AT.onWipeOrKill(eventCode, inCombat)
 	zo_callLater(function ()
 		if IsUnitInCombat("player") == false and IsUnitDead("player") == false then
-			AsylumTimers_FelmsTimer:SetColor(1.0, 1.0, 1.0, 1.0)
+			AsylumTimers_BashTimer:SetText("")
+			AsylumTimers_FelmsTimer:SetText("")
+			AsylumTimers_JumpTimer:SetText("")
+			AsylumTimers_KiteTimer:SetText("")
+			AsylumTimers_LlothisTimer:SetText("")
+			
 			AT.time_Felms = 0
 			AT.time_Llothis = 0
+			AT.time_Bash = 0
+			AT.time_Jump = 0
+			AT.time_Kite = 0
+			AT.felmsJumps = 0
+			AT.activeBash = false
+			AT.activeKite = false
 			AT.hasLlothisSpawned = false
 			AT.hasFelmsSpawned = false
 			AT.isLlothisEnraged = false
@@ -103,7 +213,8 @@ function AT.onNewZone(eventCode, initial)
 			
 			EVENT_MANAGER:RegisterForUpdate(AT.name, 1000, AT.updateText)
 			EVENT_MANAGER:RegisterForEvent(AT.name, EVENT_EFFECT_CHANGED, AT.onEffect)
-			EVENT_MANAGER:RegisterForEvent(AT.name, EVENT_PLAYER_ALIVE, AT.onWipe)
+			EVENT_MANAGER:RegisterForEvent(AT.name, EVENT_PLAYER_ALIVE, AT.onWipeOrKill)
+			EVENT_MANAGER:RegisterForEvent(AT.name, EVENT_PLAYER_COMBAT_STATE, AT.onWipeOrKill)
 			EVENT_MANAGER:RegisterForEvent(AT.name, EVENT_COMBAT_EVENT, AT.onCombatEvent)
 		end
 	else
@@ -120,29 +231,74 @@ function AT.onNewZone(eventCode, initial)
 end
 
 function AT.Initialize()
-
+	
 	AT.defaults = {
-		debugMessages = false,
-		
 		selectedFontNumber_Timers = "22",
 		selectedFontName_Timers = "ZoFontGamepad22",
+		
+		
+		normalColor = {
+			red = 1.0,
+			green = 1.0,
+			blue = 1.0,
+			alpha = 1.0,
+		},
+		mechColor = {
+			red = 0.0,
+			green = 1.0,
+			blue = 1.0,
+			alpha = 1.00,
+		},
+		enragedColor = {
+			red = 1.0,
+			green = 0.0,
+			blue = 0.0,
+			alpha = 1.0,
+		},
+		soonColor = {
+			red = 1.0,
+			green = 0.0,
+			blue = 0.0,
+			alpha = 1.0,
+		},
+		downedColor = {
+			red = 0,
+			green = 1,
+			blue = 0,
+			alpha = 1,
+		},
 		
 		checked = false,
 		offset_x = 0,
 		offset_y = 0,
+		
+		bashSound = true,
+	}
+	
+	AT.cooldowns = {
+		bash = 12,
+		kite = 35,
+		jump = 20,
 	}
 	
 
 	AT.isRegistered = false
 	AT.time_Llothis = 0
 	AT.time_Felms = 0
+	AT.time_Bash = 0
+	AT.time_Kite = 0
+	AT.time_Jump = 0
+	AT.felmsJumps = 0
+	AT.activeKite = false
+	AT.displayKite = false
+	AT.activeBash = false
 	AT.hasLlothisSpawned = false
 	AT.hasFelmsSpawned = false
 	AT.isLlothisEnraged = false
 	AT.isFelmsEnraged = false
-
-	AT.chat = LibChatMessage("AsylumTimers", "AT") 
-	LibChatMessage:SetTagPrefixMode(1)
+	AT.hasFelmsJumpedRecently = false
+	AT.hasLlothisBashSoundPlayedRecently = false
+	
 	
 	AT.savedVariables = ZO_SavedVars:NewAccountWide("ATSavedVariables", 1, nil, AT.defaults, GetWorldName())
 	updateFont(AT.savedVariables.selectedFontName_Timers)	
@@ -157,6 +313,7 @@ function AT.Initialize()
 	
 	local generalSection = {type = LibHarvensAddonSettings.ST_SECTION,label = "General",}
 	local timerSection = {type = LibHarvensAddonSettings.ST_SECTION,label = "Timers",}
+	local otherSection = {type = LibHarvensAddonSettings.ST_SECTION, label = "OTHER",}
 	
 	local toggle = {
         type = LibHarvensAddonSettings.ST_CHECKBOX, --setting type
@@ -173,41 +330,37 @@ function AT.Initialize()
         disable = function() return areSettingsDisabled end,
     }
 	
-	local toggleDebug = {
-        type = LibHarvensAddonSettings.ST_CHECKBOX, --setting type
-        label = "Debug Messages", 
-        tooltip = "Enables Debug messages.\n\nThis will only be useful to me as I test it on console. The final version of this addon won't have debug messages",
-        default = AT.defaults.debugMessages,
-        setFunction = function(state) 
-            AT.savedVariables.debugMessages = state
-        end,
-        getFunction = function() 
-            return AT.savedVariables.debugMessages
-        end,
-        disable = function() return areSettingsDisabled end,
-    }
-	
 	local resetDefaults = {
         type = LibHarvensAddonSettings.ST_BUTTON,
         label = "Reset Defaults",
         tooltip = "",
         buttonText = "RESET",
         clickHandler = function(control, button)
-			AT.savedVariables.debugMessages = AT.defaults.debugMessages
-			
+			--save
+			AT.savedVariables.checked = AT.defaults.checked
+		
 			AT.savedVariables.selectedFontNumber_Timers = AT.defaults.selectedFontNumber_Timers
 			AT.savedVariables.selectedFontName_Timers = AT.defaults.selectedFontName_Timers
+			
+			AT.savedVariables.normalColor = AT.defaults.normalColor
+			AT.savedVariables.mechColor = AT.defaults.mechColor
+			AT.savedVariables.enragedColor = AT.defaults.enragedColor
+			AT.savedVariables.soonColor = AT.defaults.soonColor
+			AT.savedVariables.downedColor = AT.defaults.downedColor
+			
+			AT.savedVariables.bashSound = AT.defaults.bashSound
+			
 			AT.savedVariables.selectedPos_Timers = AT.defaults.selectedPos_Timers
 			AT.savedVariables.selectedPosName_Timers = AT.defaults.selectedPosName_Timers
-			
-			AT.savedVariables.checked = AT.defaults.checked
 			AT.savedVariables.offset_x = AT.defaults.offset_x
 			AT.savedVariables.offset_y = AT.defaults.offset_y
 			
+			--apply
 			updateFont(selectedFontName_Timers)
 			
 			AsylumTimers:ClearAnchors()
 			AsylumTimers:SetAnchor(3, GuiRoot, 3, AT.savedVariables.offset_x, AT.savedVariables.offset_y)			
+			
 		end,
         disable = function() return areSettingsDisabled end,
     }
@@ -266,6 +419,76 @@ function AT.Initialize()
         disable = function() return areSettingsDisabled end,
     }
 	
+	local normalColor = {
+        type = LibHarvensAddonSettings.ST_COLOR,
+        label = "Normal Color",
+        tooltip = "Change the color of the timer when there are no other mechanics active.",
+        setFunction = function(...) --newR, newG, newB, newA
+            AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha = ...
+        end,
+        default = {AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha},
+        getFunction = function()
+            return AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha
+        end,
+        disable = function() return areSettingsDisabled end,
+    }
+	
+	local mechColor = {
+        type = LibHarvensAddonSettings.ST_COLOR,
+        label = "Mechanic Color",
+        tooltip = "Change the color of the timer when there is an active mechanic (e.g. kite, interrupt, jump).",
+        setFunction = function(...) --newR, newG, newB, newA
+            AT.savedVariables.mechColor.red, AT.savedVariables.mechColor.green, AT.savedVariables.mechColor.blue, AT.savedVariables.mechColor.alpha = ...
+        end,
+        default = {AT.savedVariables.mechColor.red, AT.savedVariables.mechColor.green, AT.savedVariables.mechColor.blue, AT.savedVariables.mechColor.alpha},
+        getFunction = function()
+            return AT.savedVariables.mechColor.red, AT.savedVariables.mechColor.green, AT.savedVariables.mechColor.blue, AT.savedVariables.mechColor.alpha
+        end,
+        disable = function() return areSettingsDisabled end,
+    }
+	
+	local enragedColor = {
+        type = LibHarvensAddonSettings.ST_COLOR,
+        label = "Enraged Color",
+        tooltip = "Change the color of the timer when a miniboss is enraged.",
+        setFunction = function(...) --newR, newG, newB, newA
+            AT.savedVariables.enragedColor.red, AT.savedVariables.enragedColor.green, AT.savedVariables.enragedColor.blue, AT.savedVariables.enragedColor.alpha = ...
+        end,
+        default = {AT.savedVariables.enragedColor.red, AT.savedVariables.enragedColor.green, AT.savedVariables.enragedColor.blue, AT.savedVariables.enragedColor.alpha},
+        getFunction = function()
+            return AT.savedVariables.enragedColor.red, AT.savedVariables.enragedColor.green, AT.savedVariables.enragedColor.blue, AT.savedVariables.enragedColor.alpha
+        end,
+        disable = function() return areSettingsDisabled end,
+    }
+	
+	local soonColor = {
+        type = LibHarvensAddonSettings.ST_COLOR,
+        label = "Soon Color",
+        tooltip = "Change the color of the mechanic timer when it is expected at any moment.",
+        setFunction = function(...) --newR, newG, newB, newA
+            AT.savedVariables.soonColor.red, AT.savedVariables.soonColor.green, AT.savedVariables.soonColor.blue, AT.savedVariables.soonColor.alpha = ...
+        end,
+        default = {AT.savedVariables.soonColor.red, AT.savedVariables.soonColor.green, AT.savedVariables.soonColor.blue, AT.savedVariables.soonColor.alpha},
+        getFunction = function()
+            return AT.savedVariables.soonColor.red, AT.savedVariables.soonColor.green, AT.savedVariables.soonColor.blue, AT.savedVariables.soonColor.alpha
+        end,
+        disable = function() return areSettingsDisabled end,
+    }
+	
+	local downedColor = {
+        type = LibHarvensAddonSettings.ST_COLOR,
+        label = "Downed Color",
+        tooltip = "Change the color of the timer when a miniboss is respawning.",
+        setFunction = function(...) --newR, newG, newB, newA
+            AT.savedVariables.downedColor.red, AT.savedVariables.downedColor.green, AT.savedVariables.downedColor.blue, AT.savedVariables.downedColor.alpha = ...
+        end,
+        default = {AT.savedVariables.downedColor.red, AT.savedVariables.downedColor.green, AT.savedVariables.downedColor.blue, AT.savedVariables.downedColor.alpha},
+        getFunction = function()
+            return AT.savedVariables.downedColor.red, AT.savedVariables.downedColor.green, AT.savedVariables.downedColor.blue, AT.savedVariables.downedColor.alpha
+        end,
+        disable = function() return areSettingsDisabled end,
+    }
+	
 	local offset_x = {
         type = LibHarvensAddonSettings.ST_SLIDER,
         label = "X Offset",
@@ -310,8 +533,23 @@ function AT.Initialize()
         disable = function() return areSettingsDisabled end,
     }
 	
-	settings:AddSettings({generalSection, toggle, toggleDebug, resetDefaults})
-	settings:AddSettings({timerSection, timer_font, offset_x, offset_y})
+	local toggleBashSound = {
+        type = LibHarvensAddonSettings.ST_CHECKBOX, --setting type
+        label = "Bash Sound", 
+        tooltip = "Plays a sound during Llothis' interrupt mechanic",
+        default = AT.defaults.bashSound,
+        setFunction = function(state) 
+            AT.savedVariables.bashSound = state
+        end,
+        getFunction = function() 
+            return AT.savedVariables.bashSound
+        end,
+        disable = function() return areSettingsDisabled end,
+    }
+	
+	settings:AddSettings({generalSection, toggle, resetDefaults})
+	settings:AddSettings({timerSection, timer_font, normalColor, mechColor, enragedColor, soonColor, downedColor, offset_x, offset_y})
+	settings:AddSettings({otherSection, toggleBashSound})
 	
 	EVENT_MANAGER:RegisterForEvent(AT.name, EVENT_PLAYER_ACTIVATED, AT.onNewZone)
 end
