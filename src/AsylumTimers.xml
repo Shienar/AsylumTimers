@@ -13,6 +13,12 @@
 					text="">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)_LlothisTitle" relativePoint="TOPRIGHT" offsetX="8" />
 				</Label>
+				<Label name="$(parent)_BashTimer" width="300" height="25" font="ZoFontGamepad22" color="FFFFFF" wrapMode="TRUNCATE" 
+					verticalAlignment="BOTTOM" horizontalAlignment="LEFT"
+					text="">
+					<Anchor point="TOPLEFT" relativeTo="$(parent)_LlothisTimer" relativePoint="TOPRIGHT" offsetX="8" />
+				</Label>
+				
 				<Label name="$(parent)_FelmsTitle" width="300" height="25" font="ZoFontGamepad22" color="FFFF00" wrapMode="TRUNCATE" 
 					verticalAlignment="BOTTOM" horizontalAlignment="LEFT"
 					text="Felms:">
@@ -22,6 +28,11 @@
 					verticalAlignment="BOTTOM" horizontalAlignment="LEFT"
 					text="">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)_FelmsTitle" relativePoint="TOPRIGHT" offsetX="8" />
+				</Label>
+				<Label name="$(parent)_JumpTimer" width="300" height="25" font="ZoFontGamepad22" color="FFFFFF" wrapMode="TRUNCATE" 
+					verticalAlignment="BOTTOM" horizontalAlignment="LEFT"
+					text="">
+					<Anchor point="TOPLEFT" relativeTo="$(parent)_FelmsTimer" relativePoint="TOPRIGHT" offsetX="8" />
 				</Label>
 				
 				<Label name="$(parent)_KiteTitle" width="300" height="25" font="ZoFontGamepad22" color="FFFF00" wrapMode="TRUNCATE" 
@@ -33,28 +44,6 @@
 					verticalAlignment="BOTTOM" horizontalAlignment="LEFT"
 					text="">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)_KiteTitle" relativePoint="TOPRIGHT" offsetX="8" />
-				</Label>
-				
-				<Label name="$(parent)_BashTitle" width="300" height="25" font="ZoFontGamepad22" color="FFFF00" wrapMode="TRUNCATE" 
-					verticalAlignment="BOTTOM" horizontalAlignment="LEFT"
-					text="Llothis Bash:">
-					<Anchor point="TOPLEFT" relativeTo="$(parent)_KiteTitle" relativePoint="BOTTOMLEFT" />
-				</Label>
-				<Label name="$(parent)_BashTimer" width="300" height="25" font="ZoFontGamepad22" color="FFFFFF" wrapMode="TRUNCATE" 
-					verticalAlignment="BOTTOM" horizontalAlignment="LEFT"
-					text="">
-					<Anchor point="TOPLEFT" relativeTo="$(parent)_BashTitle" relativePoint="TOPRIGHT" offsetX="8" />
-				</Label>
-				
-				<Label name="$(parent)_JumpTitle" width="300" height="25" font="ZoFontGamepad22" color="FFFF00" wrapMode="TRUNCATE" 
-					verticalAlignment="BOTTOM" horizontalAlignment="LEFT"
-					text="Felms Jump:">
-					<Anchor point="TOPLEFT" relativeTo="$(parent)_BashTitle" relativePoint="BOTTOMLEFT" />
-				</Label>
-				<Label name="$(parent)_JumpTimer" width="300" height="25" font="ZoFontGamepad22" color="FFFFFF" wrapMode="TRUNCATE" 
-					verticalAlignment="BOTTOM" horizontalAlignment="LEFT"
-					text="">
-					<Anchor point="TOPLEFT" relativeTo="$(parent)_JumpTitle" relativePoint="TOPRIGHT" offsetX="8" />
 				</Label>
 				
 			</Controls>

@@ -5,11 +5,9 @@ local function updateFont(font)
 	AsylumTimers_LlothisTimer:SetFont(font)
 	AsylumTimers_FelmsTitle:SetFont(font)
 	AsylumTimers_FelmsTimer:SetFont(font)
-	AsylumTimers_BashTitle:SetFont(font)
 	AsylumTimers_BashTimer:SetFont(font)
 	AsylumTimers_KiteTitle:SetFont(font)
 	AsylumTimers_KiteTimer:SetFont(font)
-	AsylumTimers_JumpTitle:SetFont(font)
 	AsylumTimers_JumpTimer:SetFont(font)
 end
 
@@ -56,27 +54,27 @@ function AT.updateText()
 	
 	--Bash
 	if AT.activeBash then
-		AsylumTimers_BashTimer:SetText("BASH")
+		AsylumTimers_BashTimer:SetText("(BASH)")
 		AsylumTimers_BashTimer:SetColor(AT.savedVariables.mechColor.red, AT.savedVariables.mechColor.green, AT.savedVariables.mechColor.blue, AT.savedVariables.mechColor.alpha)
 	elseif AT.time_Bash > 0 then 
-		AsylumTimers_BashTimer:SetText(formatSeconds(AT.time_Bash))
+		AsylumTimers_BashTimer:SetText("("..formatSeconds(AT.time_Bash)..")")
 		AT.time_Bash = AT.time_Bash - 1
 		AsylumTimers_BashTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
 	elseif AT.hasLlothisSpawned then
-		AsylumTimers_BashTimer:SetText("SOON")
+		AsylumTimers_BashTimer:SetText("(SOON)")
 		AsylumTimers_BashTimer:SetColor(AT.savedVariables.soonColor.red, AT.savedVariables.soonColor.green, AT.savedVariables.soonColor.blue, AT.savedVariables.soonColor.alpha)
 	end
 	
 	--Jump (Felms)
 	if AT.felmsJumps ~= 0 then
-		AsylumTimers_JumpTimer:SetText("JUMPING")
+		AsylumTimers_JumpTimer:SetText("(JUMPING)")
 		AsylumTimers_JumpTimer:SetColor(AT.savedVariables.mechColor.red, AT.savedVariables.mechColor.green, AT.savedVariables.mechColor.blue, AT.savedVariables.mechColor.alpha)
 	elseif AT.time_Jump > 0 then
-		AsylumTimers_JumpTimer:SetText(formatSeconds(AT.time_Jump))
+		AsylumTimers_JumpTimer:SetText("("..formatSeconds(AT.time_Jump)..")")
 		AT.time_Jump = AT.time_Jump - 1
 		AsylumTimers_JumpTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
 	elseif AT.hasFelmsSpawned then
-		AsylumTimers_JumpTimer:SetText("SOON")
+		AsylumTimers_JumpTimer:SetText("(SOON)")
 		AsylumTimers_JumpTimer:SetColor(AT.savedVariables.soonColor.red, AT.savedVariables.soonColor.green, AT.savedVariables.soonColor.blue, AT.savedVariables.soonColor.alpha)
 	end
 end
@@ -122,31 +120,35 @@ function AT.onEffect(eventCode, changeType, effectSlot, effectName, unitTag, beg
 end
 
 function AT.onCombatEvent(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, _log, sourceUnitID, targetUnitID, abilityID, overflow)
-	--Miniboss Spawn
-	if AT.hasLlothisSpawned == false and(string.find(sourceName, "Llothis") ~= nil or string.find(targetName, "Llothis") ~= nil) then
+	--Player hits miniboss for the first time.
+	if AT.hasLlothisSpawned == false and string.find(targetName, "Llothis") ~= nil then
 		AT.hasLlothisSpawned = true
-		AT.time_Llothis = 180
-		AT.time_Bash = AT.cooldowns.bash
+		
+		if AT.spawnTimes[tostring(targetID)] == nil then
+			AT.time_Llothis = 180
+		else
+			AT.time_Llothis = 180 - (GetGameTimeSeconds() - AT.spawnTimes[tostring(targetID)])
+		end
+		
+		AT.time_Bash = AT.cooldowns.bash - (GetGameTimeSeconds() - AT.spawnTimes[tostring(targetID)])
 		AsylumTimers_BashTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
-	elseif AT.hasFelmsSpawned == false and (string.find(sourceName, "Felms") ~= nil or string.find(targetName, "Felms") ~= nil) then	
+	elseif AT.hasFelmsSpawned == false and string.find(targetName, "Felms") ~= nil then	
 		AT.hasFelmsSpawned = true
-		AT.time_Felms = 180
-		AT.time_Jump = AT.cooldowns.jump
+		
+		if AT.spawnTimes[tostring(targetID)] == nil then
+			AT.time_Felms = 180
+		else
+			AT.time_Felms = 180 - (GetGameTimeSeconds() - AT.spawnTimes[tostring(targetID)])
+		end
+		AT.time_Jump = AT.cooldowns.jump - (GetGameTimeSeconds() - AT.spawnTimes[tostring(targetID)])
 		AsylumTimers_JumpTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
 	end
 	
-	--Llothis Bash
-	if result == ACTION_RESULT_INTERRUPT then
-		AT.time_Bash = AT.cooldowns.bash
-		AsylumTimers_BashTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
-		
-		AT.activeBash = false
-		zo_callLater(function()
-			AT.activeBash = false 
-		end, 2500)
-	end
-	
-	if abilityID == 95687 or abilityID == 9566 then --Oppressive Bolt Sound
+	if abilityID == 10298 then --ad spawns, only lets us use targetID
+		if AT.hasFelmsSpawned == false or AT.hasLlothisSpawned == false then
+			AT.spawnTimes[tostring(targetID)] = GetGameTimeSeconds()
+		end
+	elseif abilityID == 95687 or abilityID == 9566 then --Oppressive Bolt Sound
 		if AT.savedVariables.bashSound and AT.hasLlothisBashSoundPlayedRecently == false then
 			PlaySound(SOUNDS.RAID_TRIAL_FAILED)
 			AT.hasLlothisBashSoundPlayedRecently = true
@@ -176,6 +178,17 @@ function AT.onCombatEvent(eventCode, result, isError, abilityName, abilityGraphi
 			AsylumTimers_JumpTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
 		end
 	end
+	
+	--Llothis Bash
+	if result == ACTION_RESULT_INTERRUPT then
+		AT.time_Bash = AT.cooldowns.bash
+		AsylumTimers_BashTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
+		
+		AT.activeBash = false
+		zo_callLater(function()
+			AT.activeBash = false 
+		end, 2500)
+	end
 end
 
 function AT.onWipeOrKill(eventCode, inCombat)
@@ -199,6 +212,7 @@ function AT.onWipeOrKill(eventCode, inCombat)
 			AT.hasFelmsSpawned = false
 			AT.isLlothisEnraged = false
 			AT.isFelmsEnraged = false
+			AT.spawnTimes = { }
 		end
 	end, 2000)
 end
@@ -225,6 +239,7 @@ function AT.onNewZone(eventCode, initial)
 			EVENT_MANAGER:UnregisterForUpdate(AT.name, AT.updateText)
 			EVENT_MANAGER:UnregisterForEvent(AT.name, EVENT_EFFECT_CHANGED)
 			EVENT_MANAGER:UnregisterForEvent(AT.name, EVENT_PLAYER_ALIVE)
+			EVENT_MANAGER:UnregisterForEvent(AT.name, EVENT_PLAYER_COMBAT_STATE)
 			EVENT_MANAGER:UnregisterForEvent(AT.name, EVENT_COMBAT_EVENT)
 		end
 	end
@@ -298,6 +313,7 @@ function AT.Initialize()
 	AT.isFelmsEnraged = false
 	AT.hasFelmsJumpedRecently = false
 	AT.hasLlothisBashSoundPlayedRecently = false
+	AT.spawnTimes = { }
 	
 	
 	AT.savedVariables = ZO_SavedVars:NewAccountWide("ATSavedVariables", 1, nil, AT.defaults, GetWorldName())
