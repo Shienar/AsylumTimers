@@ -9,6 +9,15 @@ local function updateFont(font)
 	AsylumTimers_KiteTitle:SetFont(font)
 	AsylumTimers_KiteTimer:SetFont(font)
 	AsylumTimers_JumpTimer:SetFont(font)
+	
+	AsylumTimers_LlothisTitle:SetHeight(AsylumTimers_LlothisTitle:GetFontHeight())
+	AsylumTimers_LlothisTimer:SetHeight(AsylumTimers_LlothisTimer:GetFontHeight())
+	AsylumTimers_FelmsTitle:SetHeight(AsylumTimers_FelmsTitle:GetFontHeight())
+	AsylumTimers_FelmsTimer:SetHeight(AsylumTimers_FelmsTimer:GetFontHeight())
+	AsylumTimers_BashTimer:SetHeight(AsylumTimers_BashTimer:GetFontHeight())
+	AsylumTimers_KiteTitle:SetHeight(AsylumTimers_KiteTitle:GetFontHeight())
+	AsylumTimers_KiteTimer:SetHeight(AsylumTimers_KiteTimer:GetFontHeight())
+	AsylumTimers_JumpTimer:SetHeight(AsylumTimers_JumpTimer:GetFontHeight())
 end
 
 local function formatSeconds(seconds)
@@ -221,7 +230,7 @@ function AT.onNewZone(eventCode, initial)
 	local zoneID, _, _, _ = GetUnitRawWorldPosition("player")
 	
 	if zoneID == 1000 then
-		AsylumTimers:SetHidden(false)
+		AsylumTimers:SetHidden(AT.savedVariables.checked)
 		if AT.isRegistered == false then
 			AT.isRegistered = true
 			
@@ -242,6 +251,18 @@ function AT.onNewZone(eventCode, initial)
 			EVENT_MANAGER:UnregisterForEvent(AT.name, EVENT_PLAYER_COMBAT_STATE)
 			EVENT_MANAGER:UnregisterForEvent(AT.name, EVENT_COMBAT_EVENT)
 		end
+	end
+end
+
+local function fragmentChange(oldState, newState)
+	if newState == SCENE_FRAGMENT_SHOWN then
+		local zoneID, _, _, _ = GetUnitRawWorldPosition("player")
+	
+		if zoneID == 1000 then
+			AsylumTimers:SetHidden(AT.savedVariables.checked)
+		end
+	elseif newState == SCENE_FRAGMENT_HIDDEN then
+		AsylumTimers:SetHidden(true)
 	end
 end
 
@@ -296,7 +317,6 @@ function AT.Initialize()
 		jump = 20,
 	}
 	
-
 	AT.isRegistered = false
 	AT.time_Llothis = 0
 	AT.time_Felms = 0
@@ -323,6 +343,8 @@ function AT.Initialize()
 
 	AT.onNewZone(_, _)
 	
+	HUD_FRAGMENT:RegisterCallback("StateChange", fragmentChange)
+	
 	--settings
 	local settings = LibHarvensAddonSettings:AddAddon("Asylum Timers")
 	local areSettingsDisabled = false
@@ -330,6 +352,8 @@ function AT.Initialize()
 	local generalSection = {type = LibHarvensAddonSettings.ST_SECTION,label = "General",}
 	local timerSection = {type = LibHarvensAddonSettings.ST_SECTION,label = "Timers",}
 	local otherSection = {type = LibHarvensAddonSettings.ST_SECTION, label = "OTHER",}
+	
+	local changeCounter = 0
 	
 	local toggle = {
         type = LibHarvensAddonSettings.ST_CHECKBOX, --setting type
@@ -339,6 +363,21 @@ function AT.Initialize()
         setFunction = function(state) 
             AT.savedVariables.checked = state
 			AsylumTimers:SetHidden(state)
+			
+			if state ==  false then
+				--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+				AsylumTimers:SetHidden(false)
+				changeCounter = changeCounter + 1
+				local changeNum = changeCounter
+				zo_callLater(function()
+					if changeNum == changeCounter then
+						changeCounter = 0
+						if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+							AsylumTimers:SetHidden(true)
+						end
+					end
+				end, 5000)
+			end
         end,
         getFunction = function() 
             return AT.savedVariables.checked
@@ -372,10 +411,23 @@ function AT.Initialize()
 			AT.savedVariables.offset_y = AT.defaults.offset_y
 			
 			--apply
-			updateFont(selectedFontName_Timers)
+			updateFont(AT.savedVariables.selectedFontName_Timers)
 			
 			AsylumTimers:ClearAnchors()
 			AsylumTimers:SetAnchor(3, GuiRoot, 3, AT.savedVariables.offset_x, AT.savedVariables.offset_y)			
+			
+			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+			AsylumTimers:SetHidden(false)
+			changeCounter = changeCounter + 1
+			local changeNum = changeCounter
+			zo_callLater(function()
+				if changeNum == changeCounter then
+					changeCounter = 0
+					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+						AsylumTimers:SetHidden(true)
+					end
+				end
+			end, 5000)
 			
 		end,
         disable = function() return areSettingsDisabled end,
@@ -389,6 +441,19 @@ function AT.Initialize()
 			updateFont(item.data)
 			AT.savedVariables.selectedFontNumber_Timers = name
 			AT.savedVariables.selectedFontName_Timers = item.data
+			
+			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+			AsylumTimers:SetHidden(false)
+			changeCounter = changeCounter + 1
+			local changeNum = changeCounter
+			zo_callLater(function()
+				if changeNum == changeCounter then
+					changeCounter = 0
+					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+						AsylumTimers:SetHidden(true)
+					end
+				end
+			end, 5000)
         end,
         getFunction = function()
             return AT.savedVariables.selectedFontNumber_Timers
@@ -441,7 +506,20 @@ function AT.Initialize()
         tooltip = "Change the color of the timer when there are no other mechanics active.",
         setFunction = function(...) --newR, newG, newB, newA
             AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha = ...
-        end,
+        
+			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+			AsylumTimers:SetHidden(false)
+			changeCounter = changeCounter + 1
+			local changeNum = changeCounter
+			zo_callLater(function()
+				if changeNum == changeCounter then
+					changeCounter = 0
+					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+						AsylumTimers:SetHidden(true)
+					end
+				end
+			end, 5000)
+		end,
         default = {AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha},
         getFunction = function()
             return AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha
@@ -455,7 +533,20 @@ function AT.Initialize()
         tooltip = "Change the color of the timer when there is an active mechanic (e.g. kite, interrupt, jump).",
         setFunction = function(...) --newR, newG, newB, newA
             AT.savedVariables.mechColor.red, AT.savedVariables.mechColor.green, AT.savedVariables.mechColor.blue, AT.savedVariables.mechColor.alpha = ...
-        end,
+       
+			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+			AsylumTimers:SetHidden(false)
+			changeCounter = changeCounter + 1
+			local changeNum = changeCounter
+			zo_callLater(function()
+				if changeNum == changeCounter then
+					changeCounter = 0
+					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+						AsylumTimers:SetHidden(true)
+					end
+				end
+			end, 5000)
+	    end,
         default = {AT.savedVariables.mechColor.red, AT.savedVariables.mechColor.green, AT.savedVariables.mechColor.blue, AT.savedVariables.mechColor.alpha},
         getFunction = function()
             return AT.savedVariables.mechColor.red, AT.savedVariables.mechColor.green, AT.savedVariables.mechColor.blue, AT.savedVariables.mechColor.alpha
@@ -469,7 +560,20 @@ function AT.Initialize()
         tooltip = "Change the color of the timer when a miniboss is enraged.",
         setFunction = function(...) --newR, newG, newB, newA
             AT.savedVariables.enragedColor.red, AT.savedVariables.enragedColor.green, AT.savedVariables.enragedColor.blue, AT.savedVariables.enragedColor.alpha = ...
-        end,
+			
+			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+			AsylumTimers:SetHidden(false)
+			changeCounter = changeCounter + 1
+			local changeNum = changeCounter
+			zo_callLater(function()
+				if changeNum == changeCounter then
+					changeCounter = 0
+					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+						AsylumTimers:SetHidden(true)
+					end
+				end
+			end, 5000)
+		end,
         default = {AT.savedVariables.enragedColor.red, AT.savedVariables.enragedColor.green, AT.savedVariables.enragedColor.blue, AT.savedVariables.enragedColor.alpha},
         getFunction = function()
             return AT.savedVariables.enragedColor.red, AT.savedVariables.enragedColor.green, AT.savedVariables.enragedColor.blue, AT.savedVariables.enragedColor.alpha
@@ -483,7 +587,20 @@ function AT.Initialize()
         tooltip = "Change the color of the mechanic timer when it is expected at any moment.",
         setFunction = function(...) --newR, newG, newB, newA
             AT.savedVariables.soonColor.red, AT.savedVariables.soonColor.green, AT.savedVariables.soonColor.blue, AT.savedVariables.soonColor.alpha = ...
-        end,
+        
+			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+			AsylumTimers:SetHidden(false)
+			changeCounter = changeCounter + 1
+			local changeNum = changeCounter
+			zo_callLater(function()
+				if changeNum == changeCounter then
+					changeCounter = 0
+					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+						AsylumTimers:SetHidden(true)
+					end
+				end
+			end, 5000)
+		end,
         default = {AT.savedVariables.soonColor.red, AT.savedVariables.soonColor.green, AT.savedVariables.soonColor.blue, AT.savedVariables.soonColor.alpha},
         getFunction = function()
             return AT.savedVariables.soonColor.red, AT.savedVariables.soonColor.green, AT.savedVariables.soonColor.blue, AT.savedVariables.soonColor.alpha
@@ -497,7 +614,20 @@ function AT.Initialize()
         tooltip = "Change the color of the timer when a miniboss is respawning.",
         setFunction = function(...) --newR, newG, newB, newA
             AT.savedVariables.downedColor.red, AT.savedVariables.downedColor.green, AT.savedVariables.downedColor.blue, AT.savedVariables.downedColor.alpha = ...
-        end,
+        
+			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+			AsylumTimers:SetHidden(false)
+			changeCounter = changeCounter + 1
+			local changeNum = changeCounter
+			zo_callLater(function()
+				if changeNum == changeCounter then
+					changeCounter = 0
+					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+						AsylumTimers:SetHidden(true)
+					end
+				end
+			end, 5000)
+		end,
         default = {AT.savedVariables.downedColor.red, AT.savedVariables.downedColor.green, AT.savedVariables.downedColor.blue, AT.savedVariables.downedColor.alpha},
         getFunction = function()
             return AT.savedVariables.downedColor.red, AT.savedVariables.downedColor.green, AT.savedVariables.downedColor.blue, AT.savedVariables.downedColor.alpha
@@ -514,6 +644,19 @@ function AT.Initialize()
 			
 			AsylumTimers:ClearAnchors()
 			AsylumTimers:SetAnchor(3, GuiRoot, 3, AT.savedVariables.offset_x, AT.savedVariables.offset_y)
+		  
+			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+			AsylumTimers:SetHidden(false)
+			changeCounter = changeCounter + 1
+			local changeNum = changeCounter
+			zo_callLater(function()
+				if changeNum == changeCounter then
+					changeCounter = 0
+					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+						AsylumTimers:SetHidden(true)
+					end
+				end
+			end, 5000)
 		  end,
         getFunction = function()
             return AT.savedVariables.offset_x
@@ -536,6 +679,19 @@ function AT.Initialize()
 		
 			AsylumTimers:ClearAnchors()
 			AsylumTimers:SetAnchor(3, GuiRoot, 3, AT.savedVariables.offset_x, AT.savedVariables.offset_y)
+		 
+			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+			AsylumTimers:SetHidden(false)
+			changeCounter = changeCounter + 1
+			local changeNum = changeCounter
+			zo_callLater(function()
+				if changeNum == changeCounter then
+					changeCounter = 0
+					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+						AsylumTimers:SetHidden(true)
+					end
+				end
+			end, 5000)
 		 end,
         getFunction = function()
             return AT.savedVariables.offset_y
