@@ -139,6 +139,7 @@ function AT.onCombatEvent(eventCode, result, isError, abilityName, abilityGraphi
 			AT.time_Llothis = 180 - (GetGameTimeSeconds() - AT.spawnTimes[tostring(targetID)])
 		end
 		
+		AsylumTimers_LlothisTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
 		AT.time_Bash = AT.cooldowns.bash - (GetGameTimeSeconds() - AT.spawnTimes[tostring(targetID)])
 		AsylumTimers_BashTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
 	elseif AT.hasFelmsSpawned == false and string.find(targetName, "Felms") ~= nil then	
@@ -149,6 +150,8 @@ function AT.onCombatEvent(eventCode, result, isError, abilityName, abilityGraphi
 		else
 			AT.time_Felms = 180 - (GetGameTimeSeconds() - AT.spawnTimes[tostring(targetID)])
 		end
+		
+		AsylumTimers_FelmsTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
 		AT.time_Jump = AT.cooldowns.jump - (GetGameTimeSeconds() - AT.spawnTimes[tostring(targetID)])
 		AsylumTimers_JumpTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
 	end
