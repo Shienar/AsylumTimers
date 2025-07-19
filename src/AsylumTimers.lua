@@ -155,7 +155,9 @@ function AT.onCombatEvent(eventCode, result, isError, abilityName, abilityGraphi
 	
 	if abilityID == 10298 then --ad spawns, only lets us use targetID
 		if AT.hasFelmsSpawned == false or AT.hasLlothisSpawned == false then
-			AT.spawnTimes[tostring(targetID)] = GetGameTimeSeconds()
+			if AT.spawnTimes[tostring(targetID)] == nil then
+				AT.spawnTimes[tostring(targetID)] = GetGameTimeSeconds()
+			end
 		end
 	elseif abilityID == 95687 or abilityID == 9566 then --Oppressive Bolt Sound
 		if AT.savedVariables.bashSound and AT.hasLlothisBashSoundPlayedRecently == false then
