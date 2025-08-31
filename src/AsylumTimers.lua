@@ -642,7 +642,7 @@ function AT.Initialize()
 	local repositionUI = {
 		type = LibHarvensAddonSettings.ST_CHECKBOX,
 		label = "Reposition UI",
-		tooltip = "WARNING: EXPERIMENTAL!\n\nWhen enabled, you will be able to freely move around the UI with your right joystick.\n\nSet this to OFF after configuring position.",
+		tooltip = "When enabled, you will be able to freely move around the UI with your right joystick.\n\nSet this to OFF after configuring position.",
 		getFunction = function() return AT.currentlyChangingPosition end,
 		setFunction = function(value) 
 			AT.currentlyChangingPosition = value
