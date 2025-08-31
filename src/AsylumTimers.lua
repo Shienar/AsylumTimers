@@ -163,6 +163,8 @@ function AT.onCombatEvent(eventCode, result, isError, abilityName, abilityGraphi
 	elseif abilityID == 95687 or abilityID == 9566 then --Oppressive Bolt Sound
 		if AT.savedVariables.bashSound and AT.hasLlothisBashSoundPlayedRecently == false then
 			PlaySound(SOUNDS.RAID_TRIAL_FAILED)
+			PlaySound(SOUNDS.RAID_TRIAL_FAILED)
+			PlaySound(SOUNDS.RAID_TRIAL_FAILED)
 			AT.hasLlothisBashSoundPlayedRecently = true
 			zo_callLater(function() AT.hasLlothisBashSoundPlayedRecently = false end, 250)
 		end
@@ -274,8 +276,6 @@ function AT.Initialize()
 	AT.defaults = {
 		selectedFontNumber_Timers = "22",
 		selectedFontName_Timers = "ZoFontGamepad22",
-		
-		
 		normalColor = {
 			red = 1.0,
 			green = 1.0,
@@ -638,6 +638,50 @@ function AT.Initialize()
         disable = function() return areSettingsDisabled end,
     }
 	
+	AT.currentlyChangingPosition = false
+	local repositionUI = {
+		type = LibHarvensAddonSettings.ST_CHECKBOX,
+		label = "Reposition UI",
+		tooltip = "WARNING: EXPERIMENTAL!\n\nWhen enabled, you will be able to freely move around the UI with your right joystick.\n\nSet this to OFF after configuring position.",
+		getFunction = function() return AT.currentlyChangingPosition end,
+		setFunction = function(value) 
+			AT.currentlyChangingPosition = value
+			if value == true then
+				AsylumTimers:SetHidden(false)
+				EVENT_MANAGER:RegisterForUpdate(AT.name.."AdjustUI", 10,  function() 
+					local posX, posY = GetGamepadRightStickX(), GetGamepadRightStickY()
+					if posX ~= 0 or posY ~= 0 then 
+						AT.savedVariables.offset_x = AT.savedVariables.offset_x + 10*posX
+						AT.savedVariables.offset_y = AT.savedVariables.offset_y - 10*posY
+
+						if AT.savedVariables.offset_x < 0 then AT.savedVariables.offset_x = 0 end
+						if AT.savedVariables.offset_y < 0 then AT.savedVariables.offset_y = 0 end
+						if AT.savedVariables.offset_x > GuiRoot:GetWidth() then AT.savedVariables.offset_x = GuiRoot:GetWidth() end
+						if AT.savedVariables.offset_y > GuiRoot:GetHeight() then AT.savedVariables.offset_y = GuiRoot:GetHeight() end
+
+						CTRL:ClearAnchors()
+						CTRL:SetAnchor(CENTER, GuiRoot, CENTER, currentPos.x, currentPos.y)
+					end 
+				end)
+			else
+				EVENT_MANAGER:UnregisterForUpdate(AT.name.."AdjustUI")
+				--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+				AsylumTimers:SetHidden(false)
+				changeCounter = changeCounter + 1
+				local changeNum = changeCounter
+				zo_callLater(function()
+					if changeNum == changeCounter then
+						changeCounter = 0
+						if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+							AsylumTimers:SetHidden(true)
+						end
+					end
+				end, 5000)
+			end
+		end,
+		default = AT.currentlyChangingPosition
+	}
+
 	local offset_x = {
         type = LibHarvensAddonSettings.ST_SLIDER,
         label = "X Offset",
@@ -723,7 +767,7 @@ function AT.Initialize()
     }
 	
 	settings:AddSettings({generalSection, toggle, resetDefaults})
-	settings:AddSettings({timerSection, timer_font, normalColor, mechColor, enragedColor, soonColor, downedColor, offset_x, offset_y})
+	settings:AddSettings({timerSection, timer_font, normalColor, mechColor, enragedColor, soonColor, downedColor, offset_x, offset_y, repositionUI})
 	settings:AddSettings({otherSection, toggleBashSound})
 	
 	EVENT_MANAGER:RegisterForEvent(AT.name, EVENT_PLAYER_ACTIVATED, AT.onNewZone)
