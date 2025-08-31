@@ -682,75 +682,6 @@ function AT.Initialize()
 		default = AT.currentlyChangingPosition
 	}
 
-	local offset_x = {
-        type = LibHarvensAddonSettings.ST_SLIDER,
-        label = "X Offset",
-        tooltip = "",
-        setFunction = function(value)
-			AT.savedVariables.offset_x = value
-			
-			AsylumTimers:ClearAnchors()
-			AsylumTimers:SetAnchor(3, GuiRoot, 3, AT.savedVariables.offset_x, AT.savedVariables.offset_y)
-		  
-			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
-			AsylumTimers:SetHidden(false)
-			changeCounter = changeCounter + 1
-			local changeNum = changeCounter
-			zo_callLater(function()
-				if changeNum == changeCounter then
-					changeCounter = 0
-					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
-						AsylumTimers:SetHidden(true)
-					end
-				end
-			end, 5000)
-		  end,
-        getFunction = function()
-            return AT.savedVariables.offset_x
-        end,
-        default = 0,
-        min = 0,
-        max = 1800,
-        step = 5,
-        unit = "", --optional unit
-        format = "%d", --value format
-        disable = function() return areSettingsDisabled end,
-    }
-	
-	local offset_y = {
-        type = LibHarvensAddonSettings.ST_SLIDER,
-        label = "Y Offset",
-        tooltip = "",
-        setFunction = function(value)
-			AT.savedVariables.offset_y = value
-		
-			AsylumTimers:ClearAnchors()
-			AsylumTimers:SetAnchor(3, GuiRoot, 3, AT.savedVariables.offset_x, AT.savedVariables.offset_y)
-		 
-			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
-			AsylumTimers:SetHidden(false)
-			changeCounter = changeCounter + 1
-			local changeNum = changeCounter
-			zo_callLater(function()
-				if changeNum == changeCounter then
-					changeCounter = 0
-					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
-						AsylumTimers:SetHidden(true)
-					end
-				end
-			end, 5000)
-		 end,
-        getFunction = function()
-            return AT.savedVariables.offset_y
-        end,
-        default = 0,
-        min = 0,
-        max = 1000,
-        step = 5,
-        unit = "", --optional unit
-        format = "%d", --value format
-        disable = function() return areSettingsDisabled end,
-    }
 	
 	local toggleBashSound = {
         type = LibHarvensAddonSettings.ST_CHECKBOX, --setting type
@@ -767,8 +698,8 @@ function AT.Initialize()
     }
 	
 	settings:AddSettings({generalSection, toggle, resetDefaults})
-	settings:AddSettings({timerSection, timer_font, normalColor, mechColor, enragedColor, soonColor, downedColor, offset_x, offset_y, repositionUI})
-	settings:AddSettings({otherSection, toggleBashSound})
+	settings:AddSettings({timerSection, timer_font, normalColor, mechColor, enragedColor, soonColor, downedColor})
+	settings:AddSettings({otherSection, repositionUI, toggleBashSound})
 	
 	EVENT_MANAGER:RegisterForEvent(AT.name, EVENT_PLAYER_ACTIVATED, AT.onNewZone)
 end
