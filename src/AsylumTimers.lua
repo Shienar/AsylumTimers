@@ -656,11 +656,11 @@ function AT.Initialize()
 
 						if AT.savedVariables.offset_x < 0 then AT.savedVariables.offset_x = 0 end
 						if AT.savedVariables.offset_y < 0 then AT.savedVariables.offset_y = 0 end
-						if AT.savedVariables.offset_x > GuiRoot:GetWidth() then AT.savedVariables.offset_x = GuiRoot:GetWidth() end
-						if AT.savedVariables.offset_y > GuiRoot:GetHeight() then AT.savedVariables.offset_y = GuiRoot:GetHeight() end
+						if AT.savedVariables.offset_x > (GuiRoot:GetWidth() - AsylumTimers:GetWidth()) then AT.savedVariables.offset_x = (GuiRoot:GetWidth() - AsylumTimers:GetWidth()) end
+						if AT.savedVariables.offset_y >(GuiRoot:GetHeight() - AsylumTimers:GetHeight()) then AT.savedVariables.offset_y = (GuiRoot:GetHeight() - AsylumTimers:GetHeight()) end
 
-						CTRL:ClearAnchors()
-						CTRL:SetAnchor(CENTER, GuiRoot, CENTER, currentPos.x, currentPos.y)
+						AsylumTimers:ClearAnchors()
+						AsylumTimers:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, AT.savedVariables.offset_x, AT.savedVariables.offset_y)
 					end 
 				end)
 			else
