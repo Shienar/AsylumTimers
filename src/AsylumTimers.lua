@@ -641,7 +641,7 @@ function AT.Initialize()
 	AT.currentlyChangingPosition = false
 	local repositionUI = {
 		type = LibHarvensAddonSettings.ST_CHECKBOX,
-		label = "Reposition UI",
+		label = "Joystick Reposition",
 		tooltip = "When enabled, you will be able to freely move around the UI with your right joystick.\n\nSet this to OFF after configuring position.",
 		getFunction = function() return AT.currentlyChangingPosition end,
 		setFunction = function(value) 
@@ -682,6 +682,79 @@ function AT.Initialize()
 		default = AT.currentlyChangingPosition
 	}
 
+	--x position offset
+	local slider_x = {
+        type = LibHarvensAddonSettings.ST_SLIDER,
+        label = "X Offset",
+        tooltip = "",
+        setFunction = function(value)
+			AT.savedVariables.offset_x = value
+			if AT.savedVariables.selectedPos ~= 3 then AT.savedVariables.selectedPos = 3 end
+			
+			AsylumTimers:ClearAnchors()
+			AsylumTimers:SetAnchor(AT.savedVariables.selectedPos, GuiRoot, AT.savedVariables.selectedPos, AT.savedVariables.offset_x, AT.savedVariables.offset_y)
+			
+			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+			AsylumTimers:SetHidden(false)
+			changeCounter = changeCounter + 1
+			local changeNum = changeCounter
+			zo_callLater(function()
+				if changeNum == changeCounter then
+					changeCounter = 0
+					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+						AsylumTimers:SetHidden(true)
+					end
+				end
+			end, 5000)
+		end,
+        getFunction = function()
+            return AT.savedVariables.offset_x
+        end,
+        default = 0,
+        min = 0,
+        max = GuiRoot:GetWidth(),
+        step = 5,
+        unit = "", --optional unit
+        format = "%d", --value format
+        disable = function() return areSettingsDisabled end,
+    }
+	
+	--y position offset
+	local slider_y = {
+        type = LibHarvensAddonSettings.ST_SLIDER,
+        label = "Y Offset",
+        tooltip = "",
+        setFunction = function(value)
+			AT.savedVariables.offset_y = value
+			if AT.savedVariables.selectedPos ~= 3 then AT.savedVariables.selectedPos = 3 end
+			
+			AsylumTimers:ClearAnchors()
+			AsylumTimers:SetAnchor(AT.savedVariables.selectedPos, GuiRoot, AT.savedVariables.selectedPos, AT.savedVariables.offset_x, AT.savedVariables.offset_y)
+			
+			--Hide UI 5 seconds after most recent change. multiple changes can be queued.
+			AsylumTimers:SetHidden(false)
+			changeCounter = changeCounter + 1
+			local changeNum = changeCounter
+			zo_callLater(function()
+				if changeNum == changeCounter then
+					changeCounter = 0
+					if SCENE_MANAGER:GetScene("hud"):GetState() == SCENE_HIDDEN or AT.savedVariables.checked then
+						AsylumTimers:SetHidden(true)
+					end
+				end
+			end, 5000)
+		end,
+        getFunction = function()
+            return AT.savedVariables.offset_y
+        end,
+        default = 0,
+        min = 0,
+        max = GuiRoot:GetHeight(),
+        step = 5,
+        unit = "", --optional unit
+        format = "%d", --value format
+        disable = function() return areSettingsDisabled end,
+    }
 	
 	local toggleBashSound = {
         type = LibHarvensAddonSettings.ST_CHECKBOX, --setting type
@@ -699,7 +772,7 @@ function AT.Initialize()
 	
 	settings:AddSettings({generalSection, toggle, resetDefaults})
 	settings:AddSettings({timerSection, timer_font, normalColor, mechColor, enragedColor, soonColor, downedColor})
-	settings:AddSettings({otherSection, repositionUI, toggleBashSound})
+	settings:AddSettings({otherSection, repositionUI, slider_x, slider_y, toggleBashSound})
 	
 	EVENT_MANAGER:RegisterForEvent(AT.name, EVENT_PLAYER_ACTIVATED, AT.onNewZone)
 end
