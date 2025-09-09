@@ -228,7 +228,7 @@ function AT.onWipeOrKill(eventCode, inCombat)
 			AT.isFelmsEnraged = false
 			AT.spawnTimes = { }
 		end
-	end, 2000)
+	end, 4000)
 end
 
 function AT.onNewZone(eventCode, initial)
