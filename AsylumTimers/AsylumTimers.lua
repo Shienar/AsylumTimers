@@ -649,7 +649,7 @@ function AT.Initialize()
 			if value == true then
 				AsylumTimers:SetHidden(false)
 				EVENT_MANAGER:RegisterForUpdate(AT.name.."AdjustUI", 10,  function() 
-					local posX, posY = GetGamepadRightStickX(), GetGamepadRightStickY()
+					local posX, posY = GetGamepadRightStickX(true), GetGamepadRightStickY(true)
 					if posX ~= 0 or posY ~= 0 then 
 						AT.savedVariables.offset_x = AT.savedVariables.offset_x + 10*posX
 						AT.savedVariables.offset_y = AT.savedVariables.offset_y - 10*posY
