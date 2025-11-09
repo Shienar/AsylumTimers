@@ -7,4 +7,5 @@
 ## SavedVariables: ATSavedVariables
 
 AsylumTimers.xml
-AsylumTimers.lua
+settings.lua
+main.lua
