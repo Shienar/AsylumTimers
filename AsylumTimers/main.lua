@@ -63,7 +63,7 @@ function AT.updateText()
 		AsylumTimers_BashTimer:SetText("(BASH)")
 		AsylumTimers_BashTimer:SetColor(AT.savedVariables.mechColor.red, AT.savedVariables.mechColor.green, AT.savedVariables.mechColor.blue, AT.savedVariables.mechColor.alpha)
 	elseif AT.time_Bash > 0 then 
-		AsylumTimers_BashTimer:SetText("("..ZO_FormatTime(AT.time_Llothis, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_SECONDS)..")")
+		AsylumTimers_BashTimer:SetText("("..ZO_FormatTime(AT.time_Bash, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_SECONDS)..")")
 		AT.time_Bash = AT.time_Bash - 1
 		AsylumTimers_BashTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
 	elseif AT.hasLlothisSpawned then
@@ -88,6 +88,7 @@ end
 function AT.onEffect(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitID, abilityID, sourceType)
 	--Player notices miniboss for the first time.
 	if AT.hasLlothisSpawned == false and string.find(unitName, "Llothis") ~= nil then
+		if AT.spawnTimes[tostring(unitID)] == nil then AT.spawnTimes[tostring(unitID)] = GetGameTimeSeconds() end
 		AT.hasLlothisSpawned = true
 		
 		if AT.spawnTimes[tostring(unitID)] == nil then
@@ -100,6 +101,7 @@ function AT.onEffect(eventCode, changeType, effectSlot, effectName, unitTag, beg
 		AT.time_Bash = AT.cooldowns.bash - (GetGameTimeSeconds() - AT.spawnTimes[tostring(unitID)])
 		AsylumTimers_BashTimer:SetColor(AT.savedVariables.normalColor.red, AT.savedVariables.normalColor.green, AT.savedVariables.normalColor.blue, AT.savedVariables.normalColor.alpha)
 	elseif AT.hasFelmsSpawned == false and string.find(unitName, "Felms") ~= nil then	
+		if AT.spawnTimes[tostring(unitID)] == nil then AT.spawnTimes[tostring(unitID)] = GetGameTimeSeconds() end
 		AT.hasFelmsSpawned = true
 		
 		if AT.spawnTimes[tostring(unitID)] == nil then
@@ -182,7 +184,7 @@ function AT.onCombatEvent(eventCode, result, isError, abilityName, abilityGraphi
 	
 	if abilityID == 10298 then --ad spawns, only lets us use targetID
 		if AT.hasFelmsSpawned == false or AT.hasLlothisSpawned == false then
-				AT.spawnTimes[tostring(targetID)] = GetGameTimeSeconds()
+			AT.spawnTimes[tostring(targetID)] = GetGameTimeSeconds()
 		end
 	elseif abilityID == 95687 or abilityID == 9566 then --Oppressive Bolt
 		AT.activeBash = true
