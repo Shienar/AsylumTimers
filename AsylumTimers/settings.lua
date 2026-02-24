@@ -12,6 +12,7 @@ local function temporarilyShowLabels()
 end
 
 function AT.setupSettings()
+    if not LibHarvensAddonSettings then return end
 
     --settings
 	local settings = LibHarvensAddonSettings:AddAddon("Asylum Timers")

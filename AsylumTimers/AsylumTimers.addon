@@ -4,7 +4,7 @@
 ## AddOnVersion: 10303
 ## Version: 1.3.3
 ## IsLibrary: False
-## ConsoleDependsOn: LibHarvensAddonSettings>=20004
+## OptionalDependsOn: LibHarvensAddonSettings>=20004
 ## SavedVariables: ATSavedVariables
 
 AsylumTimers.xml
